@@ -3,37 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PUPK - Lomba Regu Prestasi Penggalang SD (Waktu 10 Menit)</title>
+    <title>PUPK - Lomba Regu Prestasi Penggalang SD</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Custom Pramuka Colors */
         .bg-pramuka-dark { background-color: #5C3A21; }
         .bg-pramuka-light { background-color: #E6C280; }
         .text-pramuka-dark { color: #5C3A21; }
         .text-pramuka-light { color: #E6C280; }
+        
         .radio-custom:checked + label {
             background-color: #E6C280;
             border-color: #5C3A21;
             font-weight: bold;
         }
+
+        /* Sticky Header untuk Semua Browser */
         .sticky-header {
             position: -webkit-sticky;
             position: sticky;
             top: 0;
             z-index: 50;
         }
-        @keyframes blink {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+
+        /* Animasi Getar (Shake) untuk Peringatan Waktu */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
         }
         .timer-warning {
-            color: #dc2626;
-            animation: blink 1s infinite;
+            background-color: #fee2e2 !important;
+            color: #b91c1c !important;
+            border: 2px solid #b91c1c !important;
+            animation: shake 0.5s infinite;
         }
     </style>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800">
 
+    <!-- PAGE 1: START/LOGIN -->
     <div id="page-start" class="min-h-screen flex flex-col items-center justify-center p-4" style="background-image: linear-gradient(to bottom right, #5C3A21, #8B5A2B);">
         <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full text-center">
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Tunas_Kelapa_Pramuka.svg/512px-Tunas_Kelapa_Pramuka.svg.png" alt="Tunas Kelapa" class="w-24 h-24 mx-auto mb-4" onerror="this.style.display='none'">
@@ -42,19 +59,32 @@
             <div class="bg-yellow-100 text-yellow-800 text-sm p-3 rounded-lg mb-6 font-medium">
                 ⏱️ Waktu Pengerjaan: 10 Menit
             </div>
+            
             <div class="mb-6">
                 <label for="teamName" class="block text-left text-sm font-medium text-gray-700 mb-2">Nama Regu (Contoh: Harimau / Melati)</label>
                 <input type="text" id="teamName" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-[#5C3A21]" placeholder="Masukkan nama regu..." required>
             </div>
-            <button onclick="startQuiz()" class="w-full bg-pramuka-dark hover:bg-[#4a2e1a] text-white font-bold py-3 px-4 rounded-lg transition duration-300 shadow-lg">
+            
+            <button onclick="startCountdown()" class="w-full bg-pramuka-dark hover:bg-[#4a2e1a] text-white font-bold py-3 px-4 rounded-lg transition duration-300 shadow-lg">
                 Mulai Ujian Sekarang
             </button>
         </div>
     </div>
 
+    <!-- PAGE 1.5: COUNTDOWN (HITUNG MUNDUR DISESUAIKAN DI HP) -->
+    <div id="page-countdown" class="hidden min-h-screen flex flex-col items-center justify-center p-4 bg-pramuka-dark text-white text-center">
+        <div class="bg-white/10 p-8 rounded-2xl backdrop-blur-sm border border-white/20 shadow-xl max-w-xs w-full">
+            <p class="text-lg md:text-xl font-semibold mb-3 text-yellow-300">Bersiap Ujian...</p>
+            <div id="countdownNumber" class="text-6xl md:text-8xl font-black text-white tracking-wider">3</div>
+        </div>
+    </div>
+
+    <!-- PAGE 2: QUIZ -->
     <div id="page-quiz" class="hidden min-h-screen pb-12 bg-gray-50 relative">
+        <!-- Sticky Header & Timer -->
         <div class="bg-pramuka-dark text-white sticky-header shadow-md">
-            <div id="warningBanner" class="hidden bg-red-600 text-white text-center font-bold text-sm py-1">
+            <!-- Warning Banner -->
+            <div id="warningBanner" class="hidden bg-red-600 text-white text-center font-bold text-xs md:text-sm py-1">
                 ⚠️ WAKTU TERSISA KURANG DARI 3 MENIT! ⚠️
             </div>
             <div class="p-4">
@@ -62,34 +92,43 @@
                     <div class="font-semibold bg-white text-pramuka-dark px-4 py-1 rounded-full shadow-sm text-sm">
                         Regu: <span id="displayTeamName"></span>
                     </div>
-                    <div class="bg-gray-900 text-white font-mono font-bold px-5 py-2 rounded-lg text-lg shadow-inner">
+                    <!-- Waktu dengan Efek Bergetar -->
+                    <div id="timerBox" class="bg-gray-900 text-white font-mono font-bold px-6 py-2 rounded-lg text-xl shadow-inner border-2 border-transparent transition-all">
                         Waktu: <span id="timerDisplay">10:00</span>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Question Container -->
         <div class="max-w-4xl mx-auto mt-6 px-4">
             <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-800 p-4 mb-6 rounded shadow-sm" role="alert">
                 <p class="font-bold">Total 30 Soal Ujian</p>
                 <p class="text-sm mt-1">Soal telah diacak. Jawaban akan otomatis terkumpul jika waktu 10 menit habis.</p>
             </div>
-            <div id="quizContainer" class="space-y-6"></div>
+            
+            <div id="quizContainer" class="space-y-6">
+                <!-- Soal dirender lewat JS -->
+            </div>
+
             <button onclick="submitQuizManual()" class="mt-8 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-4 rounded-xl shadow-lg transition duration-300 text-lg">
                 Selesai & Kumpulkan Jawaban
             </button>
         </div>
     </div>
 
+    <!-- PAGE 3: RESULT -->
     <div id="page-result" class="hidden min-h-screen flex flex-col items-center justify-center p-4 bg-pramuka-light text-pramuka-dark">
         <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-lg w-full text-center border-4 border-[#5C3A21]">
             <h1 class="text-3xl font-extrabold mb-2">Ujian Selesai!</h1>
             <p class="text-xl mb-6 font-semibold">Regu: <span id="resultTeamName" class="text-blue-600"></span></p>
+            
             <div class="bg-gray-50 rounded-xl p-6 mb-8 border-2 border-dashed border-gray-300">
                 <p class="text-gray-500 font-bold mb-2">Total Skor Anda</p>
                 <p class="text-6xl font-black text-green-600"><span id="finalScore"></span></p>
                 <p class="text-sm text-gray-500 mt-2 font-semibold">Skor Maksimal: 100</p>
             </div>
+
             <div class="space-y-4">
                 <button onclick="showReview()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 shadow">
                     Cek Jawaban Benar & Salah
@@ -101,6 +140,7 @@
         </div>
     </div>
 
+    <!-- PAGE 4: REVIEW -->
     <div id="page-review" class="hidden min-h-screen pb-12 bg-gray-50">
         <div class="bg-blue-800 text-white sticky-header shadow-md p-4">
             <div class="max-w-4xl mx-auto flex justify-between items-center">
@@ -110,301 +150,287 @@
                 </button>
             </div>
         </div>
+
         <div class="max-w-4xl mx-auto mt-6 px-4">
-            <div id="reviewContainer" class="space-y-6"></div>
+            <div id="reviewContainer" class="space-y-6">
+                <!-- Review dirender lewat JS -->
+            </div>
             <button onclick="backToResult()" class="mt-8 w-full bg-blue-800 hover:bg-blue-900 text-white font-bold py-4 px-4 rounded-xl shadow-lg transition duration-300 text-lg">
                 Kembali ke Skor
             </button>
         </div>
     </div>
 
-<script>
-var questions = [
-{ q: "Syarat pertama untuk menyelesaikan Syarat Kecakapan Umum (SKU) Ramu adalah...", options: ["Bisa memasak air", "Rajin dan giat mengikuti latihan Pasukan Penggalang", "Hafal seluruh sandi Pramuka", "Memiliki seragam yang lengkap"], a: 1 },
-{ q: "Kode Kehormatan bagi Pramuka Penggalang yang harus diketahui dan dihafalkan dalam tingkat Ramu adalah...", options: ["Dwisatya dan Dwidarma", "Pancasila dan UUD 1945", "Trisatya dan Dasadarma", "Sumpah Pemuda"], a: 2 },
-{ q: "Salam yang diberikan kepada sesama anggota Pramuka biasa disebut dengan...", options: ["Salam Hormat", "Salam Janji", "Salam Biasa", "Salam Komando"], a: 2 },
-{ q: "Salam yang diberikan ketika mendengar pengucapan janji Trisatya disebut...", options: ["Salam Hormat", "Salam Janji", "Salam Biasa", "Salam Bakti"], a: 1 },
-{ q: "Bentuk barisan pada saat upacara pembukaan latihan Pramuka Penggalang adalah...", options: ["Lingkaran tertutup", "Angkare (Setengah Lingkaran)", "Bersaf / Berderet", "Bentuk V"], a: 1 },
-{ q: "Alat navigasi yang menggunakan magnet untuk selalu menunjukkan arah mata angin utara dan selatan disebut...", options: ["Anemometer", "Barometer", "Altimeter", "Kompas"], a: 3 },
-{ q: "Simpul yang digunakan untuk mengawali sebuah ikatan pada tiang, dan mudah untuk dilepaskan adalah...", options: ["Simpul Mati", "Simpul Anyam", "Simpul Pangkal", "Simpul Jangkar"], a: 2 },
-{ q: "Simpul yang berguna untuk menyambung dua utas tali yang sama besarnya dan dalam keadaan tidak licin (kering) adalah...", options: ["Simpul Mati", "Simpul Hidup", "Simpul Kembar", "Simpul Pangkal"], a: 0 },
-{ q: "Bentuk Tanda Kecakapan Umum (TKU) tingkat Penggalang Ramu adalah...", options: ["Satu buah huruf V atau mayang terurai berwarna merah", "Dua buah huruf V berwarna merah", "Satu bintang bersudut lima", "Lingkaran dengan gambar api"], a: 0 },
-{ q: "Setangan leher atau kacu Pramuka berbentuk segitiga dengan warna...", options: ["Merah dan Putih", "Cokelat muda dan tua", "Merah di bagian luar, putih di bagian dalam", "Merah dan hitam"], a: 0 },
-{ q: "Sandi pramuka yang huruf-hurufnya tersusun di dalam dua garis menyilang dan dua garis tegak lurus dengan tambahan titik disebut...", options: ["Sandi Rumput", "Sandi Kotak 1", "Sandi Semaphore", "Sandi Morse"], a: 1 },
-{ q: "Warna dasar yang digunakan pada lambang atau tanda untuk golongan Penggalang adalah...", options: ["Hijau", "Merah", "Kuning", "Cokelat"], a: 1 },
-{ q: "Arti dari kiasan kata 'Ramu' pada golongan Penggalang adalah kiasan pada masa sejarah bangsa Indonesia ketika sedang...", options: ["Membangun kemerdekaan", "Berjuang mempertahankan kemerdekaan", "Meramu atau mengumpulkan kekuatan rakyat", "Merakit senjata untuk melawan penjajah"], a: 2 },
-{ q: "Hari Pramuka Indonesia diperingati setiap tanggal...", options: ["2 Mei", "14 Agustus", "28 Oktober", "10 November"], a: 1 },
-{ q: "Sebagai seorang Penggalang Ramu, kita harus tahu manfaat P3K. Apa kepanjangan dari P3K?", options: ["Pertolongan Pertama Pada Kecelakaan", "Penanganan Pertama Penyakit Kritis", "Pertolongan Pasien Pada Kecelakaan", "Pusat Pelatihan Pramuka Kota"], a: 0 },
-{ q: "Timnas Sepakbola Indonesia mencetak sejarah di tahun 2026 dengan berlaga di Putaran Ketiga Kualifikasi Piala Dunia 2026 Zona Asia. Indonesia tergabung di Grup C bersama negara...", options: ["Korea Selatan, Iran, Irak", "Jepang, Australia, Arab Saudi, Bahrain, China", "Thailand, Vietnam, Malaysia", "Uzbekistan, Qatar, Uni Emirat Arab"], a: 1 },
-{ q: "Pelatih kepala (Head Coach) asal Korea Selatan yang sukses membimbing Timnas Sepakbola Indonesia di Kualifikasi Piala Dunia 2026 adalah...", options: ["Shin Tae-yong", "Park Hang-seo", "Kim Pan-gon", "Hwang Sun-hong"], a: 0 },
-{ q: "Kejuaraan Dunia Bulu Tangkis beregu putra, yaitu Thomas Cup 2026 diselenggarakan di kota Horsens, yang terletak di negara...", options: ["Tiongkok", "Indonesia", "Denmark", "Inggris"], a: 2 },
-{ q: "Pada laga pembuka fase grup Thomas Cup 2026, tim beregu putra Indonesia tampil gemilang dan sukses menang telak 5-0 atas negara...", options: ["Jepang", "Malaysia", "Aljazair", "Prancis"], a: 2 },
-{ q: "Ajang multicabang olahraga terbesar di Asia, yaitu Asian Games 2026 diselenggarakan di kota...", options: ["Jakarta-Palembang, Indonesia", "Hangzhou, Tiongkok", "Aichi-Nagoya, Jepang", "Doha, Qatar"], a: 2 },
-{ q: "Siapakah Ketua Umum PSSI di tahun 2026 yang memiliki target dan cetak biru (blueprint) agar Indonesia bisa terus bersaing di Piala Dunia?", options: ["Zainudin Amali", "Erick Thohir", "Mochamad Iriawan", "Agum Gumelar"], a: 1 },
-{ q: "Piala Dunia FIFA 2026 akan menjadi sangat spesial karena diselenggarakan bersama oleh tiga negara tuan rumah, yaitu...", options: ["Jepang, Korea Selatan, Tiongkok", "Inggris, Wales, Skotlandia", "Amerika Serikat, Kanada, Meksiko", "Spanyol, Portugal, Maroko"], a: 2 },
-{ q: "Pebulutangkis tunggal putra muda Indonesia yang sangat percaya diri dan antusias akan melakukan debutnya (penampilan perdana) di Asian Games 2026 adalah...", options: ["Jonatan Christie", "Anthony Sinisuka Ginting", "Alwi Farhan", "Chico Aura Dwi Wardoyo"], a: 2 },
-{ q: "Cabang olahraga apakah yang diberikan target besar oleh pemerintah untuk mendulang 1 medali emas pada Asian Games 2026 menurut berita Agustus 2026?", options: ["Angkat Besi", "Pencak Silat", "Bulu Tangkis", "Panjat Tebing"], a: 2 },
-{ q: "Berdasarkan regulasi Putaran Ketiga Kualifikasi Piala Dunia 2026 Zona Asia, berapakah jumlah tim dari setiap grup yang akan otomatis lolos langsung ke putaran final Piala Dunia?", options: ["Hanya 1 tim (Juara Grup)", "2 tim teratas (Juara & Runner-up)", "3 tim teratas", "Semua tim lolos"], a: 1 },
-{ q: "Siapakah nama salah satu pemain bek keturunan (diaspora) tangguh yang menjadi andalan lini pertahanan Timnas Indonesia di tahun 2026?", options: ["Elkan Baggott", "Jay Idzes", "Pratama Arhan", "Asnawi Mangkualam"], a: 1 },
-{ q: "Kejuaraan beregu putri dunia dalam olahraga bulu tangkis yang pelaksanaannya bersamaan dengan ajang Thomas Cup 2026 disebut...", options: ["Sudirman Cup", "Uber Cup", "Suhandinata Cup", "BWF World Tour Finals"], a: 1 },
-{ q: "Pada bulan Agustus 2026, induk organisasi bola voli Indonesia juga sibuk memanggil 18 atlet putra untuk persiapan Asian Games 2026. Apa nama organisasi tersebut?", options: ["PSSI", "PBSI", "PBVSI", "PERBASI"], a: 2 },
-{ q: "Timnas Bulutangkis Indonesia mendapat dukungan penuh untuk menatap ajang-ajang besar tahun 2026. Organisasi induk olahraga bulu tangkis di Indonesia adalah...", options: ["PSSI", "PBSI", "PELTI", "PASI"], a: 1 },
-{ q: "Stadion utama kebanggaan masyarakat Indonesia yang menjadi kandang (home) saat Timnas menjamu tamu-tamunya di putaran 3 Kualifikasi Piala Dunia 2026 adalah...", options: ["Stadion Gelora Bung Tomo", "Stadion Utama Gelora Bung Karno", "Stadion Pakansari", "Stadion Manahan"], a: 1 }
-];
+    <!-- JAVASCRIPT -->
+    <script>
+        var questions = [
+            { q: "Syarat pertama untuk menyelesaikan Syarat Kecakapan Umum (SKU) Ramu adalah...", options: ["Bisa memasak air", "Rajin dan giat mengikuti latihan Pasukan Penggalang", "Hafal seluruh sandi Pramuka", "Memiliki seragam yang lengkap"], a: 1 },
+            { q: "Kode Kehormatan bagi Pramuka Penggalang yang harus diketahui dan dihafalkan dalam tingkat Ramu adalah...", options: ["Dwisatya dan Dwidarma", "Pancasila dan UUD 1945", "Trisatya dan Dasadarma", "Sumpah Pemuda"], a: 2 },
+            { q: "Salam yang diberikan kepada sesama anggota Pramuka biasa disebut dengan...", options: ["Salam Hormat", "Salam Janji", "Salam Biasa", "Salam Komando"], a: 2 },
+            { q: "Salam yang diberikan ketika mendengar pengucapan janji Trisatya disebut...", options: ["Salam Hormat", "Salam Janji", "Salam Biasa", "Salam Bakti"], a: 1 },
+            { q: "Bentuk barisan pada saat upacara pembukaan latihan Pramuka Penggalang adalah...", options: ["Lingkaran tertutup", "Angkare (Setengah Lingkaran)", "Bersaf / Berderet", "Bentuk V"], a: 1 },
+            { q: "Alat navigasi yang menggunakan magnet untuk selalu menunjukkan arah mata angin utara dan selatan disebut...", options: ["Anemometer", "Barometer", "Altimeter", "Kompas"], a: 3 },
+            { q: "Simpul yang digunakan untuk mengawali sebuah ikatan pada tiang, dan mudah untuk dilepaskan adalah...", options: ["Simpul Mati", "Simpul Anyam", "Simpul Pangkal", "Simpul Jangkar"], a: 2 },
+            { q: "Simpul yang berguna untuk menyambung dua utas tali yang sama besarnya dan dalam keadaan tidak licin (kering) adalah...", options: ["Simpul Mati", "Simpul Hidup", "Simpul Kembar", "Simpul Pangkal"], a: 0 },
+            { q: "Bentuk Tanda Kecakapan Umum (TKU) tingkat Penggalang Ramu adalah...", options: ["Satu buah huruf V atau mayang terurai berwarna merah", "Dua buah huruf V berwarna merah", "Satu bintang bersudut lima", "Lingkaran dengan gambar api"], a: 0 },
+            { q: "Setangan leher atau kacu Pramuka berbentuk segitiga dengan warna...", options: ["Merah dan Putih", "Cokelat muda dan tua", "Merah di bagian luar, putih di bagian dalam", "Merah dan hitam"], a: 0 },
+            { q: "Sandi pramuka yang huruf-hurufnya tersusun di dalam dua garis menyilang dan dua garis tegak lurus dengan tambahan titik disebut...", options: ["Sandi Rumput", "Sandi Kotak 1", "Sandi Semaphore", "Sandi Morse"], a: 1 },
+            { q: "Warna dasar yang digunakan pada lambang atau tanda untuk golongan Penggalang adalah...", options: ["Hijau", "Merah", "Kuning", "Cokelat"], a: 1 },
+            { q: "Arti dari kiasan kata 'Ramu' pada golongan Penggalang adalah kiasan pada masa sejarah bangsa Indonesia ketika sedang...", options: ["Membangun kemerdekaan", "Berjuang mempertahankan kemerdekaan", "Meramu atau mengumpulkan kekuatan rakyat", "Merakit senjata untuk melawan penjajah"], a: 2 },
+            { q: "Hari Pramuka Indonesia diperingati setiap tanggal...", options: ["2 Mei", "14 Agustus", "28 Oktober", "10 November"], a: 1 },
+            { q: "Sebagai seorang Penggalang Ramu, kita harus tahu manfaat P3K. Apa kepanjangan dari P3K?", options: ["Pertolongan Pertama Pada Kecelakaan", "Penanganan Pertama Penyakit Kritis", "Pertolongan Pasien Pada Kecelakaan", "Pusat Pelatihan Pramuka Kota"], a: 0 },
+            { q: "Timnas Sepakbola Indonesia mencetak sejarah di tahun 2026 dengan berlaga di Putaran Ketiga Kualifikasi Piala Dunia 2026 Zona Asia. Indonesia tergabung di Grup C bersama negara...", options: ["Korea Selatan, Iran, Irak", "Jepang, Australia, Arab Saudi, Bahrain, China", "Thailand, Vietnam, Malaysia", "Uzbekistan, Qatar, Uni Emirat Arab"], a: 1 },
+            { q: "Pelatih kepala (Head Coach) asal Korea Selatan yang sukses membimbing Timnas Sepakbola Indonesia di Kualifikasi Piala Dunia 2026 adalah...", options: ["Shin Tae-yong", "Park Hang-seo", "Kim Pan-gon", "Hwang Sun-hong"], a: 0 },
+            { q: "Kejuaraan Dunia Bulu Tangkis beregu putra, yaitu Thomas Cup 2026 diselenggarakan di kota Horsens, yang terletak di negara...", options: ["Tiongkok", "Indonesia", "Denmark", "Inggris"], a: 2 },
+            { q: "Pada laga pembuka fase grup Thomas Cup 2026, tim beregu putra Indonesia tampil gemilang dan sukses menang telak 5-0 atas negara...", options: ["Jepang", "Malaysia", "Aljazair", "Prancis"], a: 2 },
+            { q: "Ajang multicabang olahraga terbesar di Asia, yaitu Asian Games 2026 diselenggarakan di kota...", options: ["Jakarta-Palembang, Indonesia", "Hangzhou, Tiongkok", "Aichi-Nagoya, Jepang", "Doha, Qatar"], a: 2 },
+            { q: "Siapakah Ketua Umum PSSI di tahun 2026 yang memiliki target dan cetak biru (blueprint) agar Indonesia bisa terus bersaing di Piala Dunia?", options: ["Zainudin Amali", "Erick Thohir", "Mochamad Iriawan", "Agum Gumelar"], a: 1 },
+            { q: "Piala Dunia FIFA 2026 akan menjadi sangat spesial karena diselenggarakan bersama oleh tiga negara tuan rumah, yaitu...", options: ["Jepang, Korea Selatan, Tiongkok", "Inggris, Wales, Skotlandia", "Amerika Serikat, Kanada, Meksiko", "Spanyol, Portugal, Maroko"], a: 2 },
+            { q: "Pebulutangkis tunggal putra muda Indonesia yang sangat percaya diri dan antusias akan melakukan debutnya (penampilan perdana) di Asian Games 2026 adalah...", options: ["Jonatan Christie", "Anthony Sinisuka Ginting", "Alwi Farhan", "Chico Aura Dwi Wardoyo"], a: 2 },
+            { q: "Cabang olahraga apakah yang diberikan target besar oleh pemerintah untuk mendulang 1 medali emas pada Asian Games 2026 menurut berita Agustus 2026?", options: ["Angkat Besi", "Pencak Silat", "Bulu Tangkis", "Panjat Tebing"], a: 2 },
+            { q: "Berdasarkan regulasi Putaran Ketiga Kualifikasi Piala Dunia 2026 Zona Asia, berapakah jumlah tim dari setiap grup yang akan otomatis lolos langsung ke putaran final Piala Dunia?", options: ["Hanya 1 tim (Juara Grup)", "2 tim teratas (Juara & Runner-up)", "3 tim teratas", "Semua tim lolos"], a: 1 },
+            { q: "Siapakah nama salah satu pemain bek keturunan (diaspora) tangguh yang menjadi andalan lini pertahanan Timnas Indonesia di tahun 2026?", options: ["Elkan Baggott", "Jay Idzes", "Pratama Arhan", "Asnawi Mangkualam"], a: 1 },
+            { q: "Kejuaraan beregu putri dunia dalam olahraga bulu tangkis yang pelaksanaannya bersamaan dengan ajang Thomas Cup 2026 disebut...", options: ["Sudirman Cup", "Uber Cup", "Suhandinata Cup", "BWF World Tour Finals"], a: 1 },
+            { q: "Pada bulan Agustus 2026, induk organisasi bola voli Indonesia juga sibuk memanggil 18 atlet putra untuk persiapan Asian Games 2026. Apa nama organisasi tersebut?", options: ["PSSI", "PBSI", "PBVSI", "PERBASI"], a: 2 },
+            { q: "Timnas Bulutangkis Indonesia mendapat dukungan penuh untuk menatap ajang-ajang besar tahun 2026. Organisasi induk olahraga bulu tangkis di Indonesia adalah...", options: ["PSSI", "PBSI", "PELTI", "PASI"], a: 1 },
+            { q: "Stadion utama kebanggaan masyarakat Indonesia yang menjadi kandang (home) saat Timnas menjamu tamu-tamunya di putaran 3 Kualifikasi Piala Dunia 2026 adalah...", options: ["Stadion Gelora Bung Tomo", "Stadion Utama Gelora Bung Karno", "Stadion Pakansari", "Stadion Manahan"], a: 1 }
+        ];
 
-var currentTeam = "";
-var userAnswers = [];
-var score = 0;
-var timeLeft = 600;
-var timerInterval;
-var isQuizSubmitted = false;
+        var currentTeam = "";
+        var userAnswers = [];
+        var score = 0;
+        
+        var timeLeft = 600; // 10 Menit
+        var timerInterval;
+        var isQuizSubmitted = false;
+        var hasGivenWarning = false;
 
-function shuffleArray(array) {
-    for (var i = array.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
-    }
-}
-
-function startQuiz() {
-    var teamInput = document.getElementById('teamName').value.trim();
-    if (teamInput === "") {
-        alert("Mohon masukkan Nama Regu Anda terlebih dahulu!");
-        return;
-    }
-    currentTeam = teamInput;
-    document.getElementById('displayTeamName').innerText = currentTeam;
-    shuffleArray(questions);
-
-    userAnswers = [];
-    for (var i = 0; i < questions.length; i++) {
-        userAnswers.push(null);
-    }
-
-    document.getElementById('page-start').classList.add('hidden');
-    document.getElementById('page-quiz').classList.remove('hidden');
-
-    renderQuestions();
-    window.scrollTo(0, 0);
-
-    timeLeft = 600;
-    isQuizSubmitted = false;
-    updateTimerDisplay();
-    timerInterval = setInterval(handleTimer, 1000);
-}
-
-function handleTimer() {
-    if (isQuizSubmitted) return;
-
-    timeLeft--;
-    updateTimerDisplay();
-
-    var timerDisplayEl = document.getElementById('timerDisplay');
-    var warningBanner = document.getElementById('warningBanner');
-
-    if (timeLeft === 180) {
-        timerDisplayEl.classList.add('timer-warning');
-        warningBanner.classList.remove('hidden');
-        alert("PERINGATAN! Waktu ujian Anda tersisa 3 MENIT lagi. Silakan segera selesaikan dan periksa kembali jawaban Regu Anda!");
-    }
-
-    if (timeLeft <= 0) {
-        clearInterval(timerInterval);
-        timerDisplayEl.innerText = "00:00";
-        alert("WAKTU HABIS! Jawaban regu Anda akan otomatis dikumpulkan.");
-        submitQuiz(true);
-    }
-}
-
-function updateTimerDisplay() {
-    if (timeLeft < 0) return;
-
-    var minutes = Math.floor(timeLeft / 60);
-    var seconds = timeLeft % 60;
-
-    var minString = minutes < 10 ? "0" + minutes : minutes;
-    var secString = seconds < 10 ? "0" + seconds : seconds;
-
-    document.getElementById('timerDisplay').innerText = minString + ":" + secString;
-}
-
-function renderQuestions() {
-    var container = document.getElementById('quizContainer');
-    container.innerHTML = "";
-
-    for (var index = 0; index < questions.length; index++) {
-        var q = questions[index];
-        var questionBox = document.createElement('div');
-
-        questionBox.className = "bg-white p-6 rounded-xl shadow-sm border border-gray-200";
-
-        var optionsHtml = "";
-
-        for (var optIndex = 0; optIndex < q.options.length; optIndex++) {
-            var opt = q.options[optIndex];
-
-            optionsHtml +=
-                '<div class="mb-3">' +
-                    '<input type="radio" name="q' + index + '" id="q' + index + '_opt' + optIndex + '" value="' + optIndex + '" class="hidden radio-custom" onchange="saveAnswer(' + index + ', ' + optIndex + ')">' +
-                    '<label for="q' + index + '_opt' + optIndex + '" class="block w-full border border-gray-300 rounded-lg p-3 cursor-pointer hover:bg-gray-100 transition shadow-sm">' +
-                        '<span class="font-bold mr-2 text-gray-700">' + String.fromCharCode(65 + optIndex) + '.</span> <span class="text-gray-800">' + opt + '</span>' +
-                    '</label>' +
-                '</div>';
+        function shuffleArray(array) {
+            for (var i = array.length - 1; i > 0; i--) {
+                var j = Math.floor(Math.random() * (i + 1));
+                var temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+            }
         }
 
-        questionBox.innerHTML =
-            '<div class="mb-4">' +
-                '<span class="inline-block bg-gray-800 text-white font-bold px-3 py-1 rounded-full text-xs mb-2">Soal ' + (index + 1) + '</span>' +
-            '</div>' +
-            '<h3 class="text-base md:text-lg font-bold text-gray-800 mb-4">' + q.q + '</h3>' +
-            '<div>' + optionsHtml + '</div>';
+        function startCountdown() {
+            var teamInput = document.getElementById('teamName').value.trim();
+            if (teamInput === "") {
+                alert("Mohon masukkan Nama Regu Anda terlebih dahulu!");
+                return;
+            }
+            currentTeam = teamInput;
+            document.getElementById('displayTeamName').innerText = currentTeam;
+            
+            document.getElementById('page-start').classList.add('hidden');
+            document.getElementById('page-countdown').classList.remove('hidden');
 
-        container.appendChild(questionBox);
-    }
-}
+            var count = 3;
+            var countdownEl = document.getElementById('countdownNumber');
+            countdownEl.innerText = count;
 
-function saveAnswer(questionIndex, optionIndex) {
-    userAnswers[questionIndex] = optionIndex;
-}
-
-function submitQuizManual() {
-    var unanswered = 0;
-
-    for (var i = 0; i < userAnswers.length; i++) {
-        if (userAnswers[i] === null) unanswered++;
-    }
-
-    if (unanswered > 0) {
-        var confirmSubmit = confirm(
-            "Ada " + unanswered +
-            " soal yang belum dijawab. Waktu Anda masih " +
-            Math.floor(timeLeft / 60) +
-            " menit. Yakin ingin mengumpulkan sekarang?"
-        );
-
-        if (!confirmSubmit) return;
-    }
-
-    submitQuiz(false);
-}
-
-function submitQuiz(isAuto) {
-    if (isQuizSubmitted) return;
-
-    isQuizSubmitted = true;
-    clearInterval(timerInterval);
-
-    var correctCount = 0;
-
-    for (var index = 0; index < questions.length; index++) {
-        if (userAnswers[index] === questions[index].a) {
-            correctCount++;
+            var countdownInterval = setInterval(function() {
+                count--;
+                if (count > 0) {
+                    countdownEl.innerText = count;
+                } else if (count === 0) {
+                    countdownEl.innerText = "MULAI!";
+                } else {
+                    clearInterval(countdownInterval);
+                    startQuiz();
+                }
+            }, 1000);
         }
-    }
 
-    score = Math.round((correctCount / questions.length) * 100);
+        function startQuiz() {
+            shuffleArray(questions);
+            userAnswers = [];
+            for(var i = 0; i < questions.length; i++) {
+                userAnswers.push(null);
+            }
+            
+            document.getElementById('page-countdown').classList.add('hidden');
+            document.getElementById('page-quiz').classList.remove('hidden');
+            
+            renderQuestions();
+            window.scrollTo(0, 0);
 
-    document.getElementById('resultTeamName').innerText = currentTeam;
-    document.getElementById('finalScore').innerText = score;
+            timeLeft = 600;
+            updateTimerDisplay();
+            timerInterval = setInterval(handleTimer, 1000);
+        }
 
-    document.getElementById('page-quiz').classList.add('hidden');
-    document.getElementById('page-result').classList.remove('hidden');
+        function handleTimer() {
+            if (isQuizSubmitted) return;
+            
+            timeLeft--;
+            updateTimerDisplay();
 
-    window.scrollTo(0, 0);
-}
+            var timerBoxEl = document.getElementById('timerBox');
+            var warningBanner = document.getElementById('warningBanner');
 
-function showReview() {
-    document.getElementById('page-result').classList.add('hidden');
-    document.getElementById('page-review').classList.remove('hidden');
-
-    var container = document.getElementById('reviewContainer');
-    container.innerHTML = "";
-
-    for (var index = 0; index < questions.length; index++) {
-        var q = questions[index];
-        var userAnswer = userAnswers[index];
-        var isCorrect = (userAnswer === q.a);
-
-        var questionBox = document.createElement('div');
-        var borderColor = isCorrect ? 'border-green-500' : 'border-red-500';
-
-        questionBox.className =
-            "bg-white p-5 md:p-6 rounded-xl shadow-sm border-l-8 " +
-            borderColor;
-
-        var optionsHtml = "";
-
-        for (var optIndex = 0; optIndex < q.options.length; optIndex++) {
-            var opt = q.options[optIndex];
-
-            var wrapperClass =
-                "w-full border border-gray-300 rounded-lg p-3 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2";
-
-            var textClass = "text-gray-700";
-            var badgeHtml = "";
-
-            if (optIndex === q.a) {
-                wrapperClass =
-                    "w-full border-2 border-green-500 bg-green-50 rounded-lg p-3 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2";
-
-                textClass = "font-bold text-green-800";
-
-                badgeHtml =
-                    '<span class="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap shadow-sm">✅ Benar</span>';
-            } else if (userAnswer === optIndex && !isCorrect) {
-                wrapperClass =
-                    "w-full border-2 border-red-500 bg-red-50 rounded-lg p-3 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2";
-
-                textClass = "font-bold text-red-600 line-through opacity-80";
-
-                badgeHtml =
-                    '<span class="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap shadow-sm">❌ Jawaban Regumu</span>';
+            // Waktu tersisa 3 menit (180 detik): Timer bergetar & banner muncul TANPA pop-up alert
+            if (timeLeft <= 180) {
+                if (!hasGivenWarning) {
+                    timerBoxEl.classList.add('timer-warning');
+                    warningBanner.classList.remove('hidden');
+                    hasGivenWarning = true;
+                }
             }
 
-            var badgeDiv = badgeHtml ? '<div>' + badgeHtml + '</div>' : '';
-
-            optionsHtml +=
-                '<div class="' + wrapperClass + '">' +
-                    '<div class="' + textClass + ' flex-1 leading-relaxed">' +
-                        '<span class="font-bold mr-1">' +
-                            String.fromCharCode(65 + optIndex) +
-                        '.</span> ' + opt +
-                    '</div>' +
-                    badgeDiv +
-                '</div>';
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                document.getElementById('timerDisplay').innerText = "00:00";
+                alert("WAKTU HABIS! Jawaban regu Anda otomatis dikumpulkan.");
+                submitQuiz(true); 
+            }
         }
 
-        var pointsText = isCorrect ? 'Benar' : 'Salah';
-        var pointsColor = isCorrect ? 'text-green-600' : 'text-red-600';
+        function updateTimerDisplay() {
+            if(timeLeft < 0) return;
+            var minutes = Math.floor(timeLeft / 60);
+            var seconds = timeLeft % 60;
+            
+            var minString = minutes < 10 ? "0" + minutes : minutes;
+            var secString = seconds < 10 ? "0" + seconds : seconds;
+            
+            document.getElementById('timerDisplay').innerText = minString + ":" + secString;
+        }
 
-        questionBox.innerHTML =
-            '<div class="mb-4 flex justify-between items-center border-b pb-3">' +
-                '<span class="inline-block bg-gray-100 text-gray-600 font-bold px-3 py-1 rounded-full text-xs md:text-sm">Soal ' +
-                    (index + 1) +
-                '</span>' +
-                '<span class="font-bold text-sm md:text-base ' +
-                    pointsColor + '">' +
-                    pointsText +
-                '</span>' +
-            '</div>' +
-            '<h3 class="text-base md:text-lg font-bold text-gray-800 mb-4 leading-relaxed">' +
-                q.q +
-            '</h3>' +
-            '<div>' + optionsHtml + '</div>';
+        function renderQuestions() {
+            var container = document.getElementById('quizContainer');
+            container.innerHTML = ""; 
+            
+            for (var index = 0; index < questions.length; index++) {
+                var q = questions[index];
+                var questionBox = document.createElement('div');
+                questionBox.className = "bg-white p-6 rounded-xl shadow-sm border border-gray-200";
+                
+                var optionsHtml = "";
+                for (var optIndex = 0; optIndex < q.options.length; optIndex++) {
+                    var opt = q.options[optIndex];
+                    optionsHtml += 
+                        '<div class="mb-3">' +
+                            '<input type="radio" name="q' + index + '" id="q' + index + '_opt' + optIndex + '" value="' + optIndex + '" class="hidden radio-custom" onchange="saveAnswer(' + index + ', ' + optIndex + ')">' +
+                            '<label for="q' + index + '_opt' + optIndex + '" class="block w-full border border-gray-300 rounded-lg p-3 cursor-pointer hover:bg-gray-100 transition shadow-sm">' +
+                                '<span class="font-bold mr-2 text-gray-700">' + String.fromCharCode(65 + optIndex) + '.</span> <span class="text-gray-800">' + opt + '</span>' +
+                            '</label>' +
+                        '</div>';
+                }
 
-        container.appendChild(questionBox);
-    }
+                questionBox.innerHTML = 
+                    '<div class="mb-4">' +
+                        '<span class="inline-block bg-gray-800 text-white font-bold px-3 py-1 rounded-full text-xs mb-2">Soal ' + (index + 1) + '</span>' +
+                    '</div>' +
+                    '<h3 class="text-base md:text-lg font-bold text-gray-800 mb-4">' + q.q + '</h3>' +
+                    '<div>' + optionsHtml + '</div>';
+                    
+                container.appendChild(questionBox);
+            }
+        }
 
-    window.scrollTo(0, 0);
-}
+        function saveAnswer(questionIndex, optionIndex) {
+            userAnswers[questionIndex] = optionIndex;
+        }
 
-function backToResult() {
-    document.getElementById('page-review').classList.add('hidden');
-    document.getElementById('page-result').classList.remove('hidden');
-    window.scrollTo(0, 0);
-}
-</script>
+        function submitQuizManual() {
+            var unanswered = 0;
+            for(var i=0; i<userAnswers.length; i++) {
+                if(userAnswers[i] === null) unanswered++;
+            }
+
+            if (unanswered > 0) {
+                var confirmSubmit = confirm("Ada " + unanswered + " soal yang belum dijawab. Yakin ingin mengumpulkan sekarang?");
+                if (!confirmSubmit) return;
+            }
+            submitQuiz(false);
+        }
+
+        function submitQuiz(isAuto) {
+            isQuizSubmitted = true;
+            clearInterval(timerInterval);
+
+            var correctCount = 0;
+            for (var index = 0; index < questions.length; index++) {
+                if (userAnswers[index] === questions[index].a) {
+                    correctCount++;
+                }
+            }
+            score = Math.round((correctCount / questions.length) * 100);
+
+            document.getElementById('resultTeamName').innerText = currentTeam;
+            document.getElementById('finalScore').innerText = score;
+
+            document.getElementById('page-quiz').classList.add('hidden');
+            document.getElementById('page-result').classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        function showReview() {
+            document.getElementById('page-result').classList.add('hidden');
+            document.getElementById('page-review').classList.remove('hidden');
+            
+            var container = document.getElementById('reviewContainer');
+            container.innerHTML = ""; 
+
+            for (var index = 0; index < questions.length; index++) {
+                var q = questions[index];
+                var userAnswer = userAnswers[index];
+                var isCorrect = (userAnswer === q.a);
+                
+                var questionBox = document.createElement('div');
+                var borderColor = isCorrect ? 'border-green-500' : 'border-red-500';
+                questionBox.className = "bg-white p-5 md:p-6 rounded-xl shadow-sm border-l-8 " + borderColor;
+                
+                var optionsHtml = "";
+                for (var optIndex = 0; optIndex < q.options.length; optIndex++) {
+                    var opt = q.options[optIndex];
+                    var wrapperClass = "w-full border border-gray-300 rounded-lg p-3 mb-3";
+                    var textClass = "text-gray-700 block";
+                    var badgeHtml = "";
+                    
+                    if (optIndex === q.a) {
+                        wrapperClass = "w-full border-2 border-green-500 bg-green-50 rounded-lg p-4 mb-3";
+                        textClass = "font-bold text-green-800 block mb-2";
+                        badgeHtml = '<span class="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm inline-block">✅ Benar</span>';
+                    } else if (userAnswer === optIndex && !isCorrect) {
+                        wrapperClass = "w-full border-2 border-red-500 bg-red-50 rounded-lg p-4 mb-3";
+                        textClass = "font-bold text-red-600 line-through opacity-80 block mb-2";
+                        badgeHtml = '<span class="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm inline-block">❌ Jawaban Regumu</span>';
+                    }
+
+                    var badgeDiv = badgeHtml ? '<div>' + badgeHtml + '</div>' : '';
+                    optionsHtml += 
+                        '<div class="' + wrapperClass + '">' +
+                            '<span class="' + textClass + '">' +
+                                '<span class="font-bold mr-1">' + String.fromCharCode(65 + optIndex) + '.</span> ' + opt +
+                            '</span>' + badgeDiv +
+                        '</div>';
+                }
+
+                var pointsText = isCorrect ? 'Benar' : 'Salah';
+                var pointsColor = isCorrect ? 'text-green-600' : 'text-red-600';
+
+                questionBox.innerHTML = 
+                    '<div class="mb-4 flex justify-between items-center border-b pb-3">' +
+                        '<span class="inline-block bg-gray-100 text-gray-600 font-bold px-3 py-1 rounded-full text-xs md:text-sm">Soal ' + (index + 1) + '</span>' +
+                        '<span class="font-bold text-sm md:text-base ' + pointsColor + '">' + pointsText + '</span>' +
+                    '</div>' +
+                    '<h3 class="text-base md:text-lg font-bold text-gray-800 mb-4 leading-relaxed">' + q.q + '</h3>' +
+                    '<div>' + optionsHtml + '</div>';
+                
+                container.appendChild(questionBox);
+            }
+            window.scrollTo(0, 0);
+        }
+
+        function backToResult() {
+            document.getElementById('page-review').classList.add('hidden');
+            document.getElementById('page-result').classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+    </script>
 </body>
 </html>
+
